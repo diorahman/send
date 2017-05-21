@@ -1,0 +1,43 @@
+{
+  "name": "send",
+  "version": "1.0.0",
+  "description": "Leaky get",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --runInBand"
+  },
+  "babel": {
+    "presets": [
+      [
+        "env",
+        {
+          "targets": {
+            "node": true
+          }
+        }
+      ]
+    ]
+  },
+  "jest": {
+    "testEnvironment": "node"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-jest": "^20.0.3",
+    "babel-preset-env": "^1.5.0",
+    "jest": "^20.0.3",
+    "leakage": "^0.3.0"
+  },
+  "dependencies": {
+    "agentkeepalive": "^3.1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/diorahman/send.git"
+  },
+  "bugs": {
+    "url": "https://github.com/diorahman/send/issues"
+  },
+  "homepage": "https://github.com/diorahman/send#readme"
+}
