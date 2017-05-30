@@ -2,25 +2,29 @@ const url = require('url')
 const http = require('http')
 const https = require('https')
 
-function fetch (opts, cb) {
+function fetch (opts = Object.create(null), cb) {
   let u = url.parse(opts.uri || opts.url)
 
   let protocol = u.protocol || ''
   let isHttps = protocol === 'https:'
   let iface = isHttps ? https : http
+  let options = Object.create(null)
 
-  let req = iface.request({
-    scheme: u.protocol.replace(/:$/, ''),
-    method: opts.method || 'GET',
-    host: u.hostname,
-    port: Number(u.port) || (isHttps ? 443 : 80),
-    path: u.path,
-    headers: opts.headers || {},
-    agent: opts.agent || false,
-    withCredentials: false,
-    localAdress: opts.localAddress
-  })
+  options.scheme = u.protocol.replace(/:$/, '')
+  options.method = opts.method || 'GET'
+  options.host = u.hostname
+  options.port = Number(u.port) || (isHttps ? 443 : 80)
+  options.path = u.path
+  options.headers = opts.headers || Object.create(null)
+  options.agent = opts.agent || false
+  options.withCredentials = false
+  options.localAdress = opts.localAddress
 
+  if (typeof opts.body === 'string') {
+    options.headers['Content-Length'] = Buffer.byteLength(opts.body)
+  }
+
+  let req = iface.request(options)
   req.setTimeout(opts.timeout || Math.pow(2, 32) * 1000)
 
   setImmediate(function () {
