@@ -1,38 +1,74 @@
 const url = require('url')
 const http = require('http')
+const https = require('https')
 
-let agent = false
+function fetch (opts, cb) {
+  let u = url.parse(opts.uri || opts.url)
 
-function fetch (uri, cb) {
-  const u = url.parse(uri)
-  const bufs = []
-  let totalLength = 0
+  let protocol = u.protocol || ''
+  let isHttps = protocol === 'https:'
+  let iface = isHttps ? https : http
 
-  if (!agent) {
-    agent = new http.Agent({ keepAlive: true })
-  }
-
-  const req = http.request({
+  let req = iface.request({
     scheme: u.protocol.replace(/:$/, ''),
-    method: 'GET',
+    method: opts.method || 'GET',
     host: u.hostname,
-    port: Number(u.port) || 80,
-    headers: {},
-    agent,
+    port: Number(u.port) || (isHttps ? 443 : 80),
+    path: u.path,
+    headers: opts.headers || {},
+    agent: opts.agent || false,
     withCredentials: false,
-    localAdress: void 0
+    localAdress: opts.localAddress
   })
 
+  req.setTimeout(opts.timeout || Math.pow(2, 32) * 1000)
+
   setImmediate(function () {
-    req.on('response', function (res) {
+    req.once('error', cb)
+
+    let totalLength = 0
+    let bufs = []
+    let response = void 0
+
+    req.once('timeout', function () {
+      let err = new Error('ETIMEDOUT')
+      err.code = 'ETIMEDOUT'
+      err.connect = req.socket && req.socket.readable === false
+
+      if (req) {
+        req.abort()
+      }
+
+      if (response) {
+        response.destroy()
+      }
+
+      cb(err)
+
+      bufs.length = 0
+    })
+
+    req.once('response', function (res) {
+      response = res
       res.on('data', function (buf) {
         bufs.push(buf)
         totalLength += buf.length
       })
-      res.on('end', function () {
-        cb(null, Buffer.concat(bufs, totalLength))
+
+      res.once('end', function () {
+        let r = Object.create(null)
+        r.headers = response.headers
+        r.statusCode = response.statusCode
+        r.body = Buffer.concat(bufs, totalLength)
+        cb(null, r)
+
+        bufs.length = 0
       })
     })
+
+    if (typeof opts.body === 'string') {
+      req.write(opts.body)
+    }
 
     req.end()
   })
