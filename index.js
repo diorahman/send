@@ -1,9 +1,18 @@
 const fetch = require('./fetch')
 const qs = require('querystring')
+const Promise = require('bluebird')
+
+Promise.config({
+  warnings: false,
+  longStackTraces: false,
+  cancellation: true,
+  monitoring: false
+})
 
 function request (opts = Object.create(null)) {
-  return new Promise(function (resolve, reject) {
-    fetch(opts, function responseHandler (err, data) {
+  let p
+  p = new Promise(function (resolve, reject, onCancel) {
+    const abort = fetch(opts, function responseHandler (err, data) {
       if (err) {
         return reject(err)
       }
@@ -25,7 +34,13 @@ function request (opts = Object.create(null)) {
       resolve(ret)
       data = null
     })
+
+    onCancel(() => {
+      const monitor = abort()
+      p.monitor = monitor
+    })
   })
+  return p
 }
 
 function make (method, url, opts = Object.create(null)) {

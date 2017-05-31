@@ -140,3 +140,17 @@ test('https', async () => {
   const {body} = await request.get(uri)
   expect(body.message).toBeTruthy()
 })
+
+test('cancel', (done) => {
+  const uri = 'https://rest.bandsintown.com/artists'
+  const req = request.get(uri)
+    .finally(() => {
+      expect(req._cancellationParent.monitor.req.aborted).toBeTruthy()
+      done()
+    })
+  setTimeout(function () {
+    req.cancel()
+    // we should have access to req object if we want to be sure
+    expect(req.isCancelled()).toBeTruthy()
+  }, 1)
+})

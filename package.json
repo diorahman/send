@@ -26,13 +26,9 @@
   "devDependencies": {
     "babel-jest": "^20.0.3",
     "babel-preset-env": "^1.5.0",
-    "bluebird": "^3.5.0",
     "jest": "^20.0.3",
     "request": "^2.81.0",
     "request-promise": "^4.2.1"
-  },
-  "dependencies": {
-    "agentkeepalive": "^3.1.0"
   },
   "repository": {
     "type": "git",
@@ -41,5 +37,8 @@
   "bugs": {
     "url": "https://github.com/diorahman/send/issues"
   },
-  "homepage": "https://github.com/diorahman/send#readme"
+  "homepage": "https://github.com/diorahman/send#readme",
+  "dependencies": {
+    "bluebird": "^3.5.0"
+  }
 }

@@ -25,6 +25,7 @@ function fetch (opts = Object.create(null), cb) {
   }
 
   let req = iface.request(options)
+  let response = void 0
   req.setTimeout(opts.timeout || Math.pow(2, 32) * 1000)
 
   setImmediate(function () {
@@ -32,7 +33,6 @@ function fetch (opts = Object.create(null), cb) {
 
     let totalLength = 0
     let bufs = []
-    let response = void 0
 
     req.once('timeout', function () {
       let err = new Error('ETIMEDOUT')
@@ -76,6 +76,20 @@ function fetch (opts = Object.create(null), cb) {
 
     req.end()
   })
+
+  return function abort (monitor = Object.create(null)) {
+    if (req) {
+      monitor.req = req
+      req.abort()
+    }
+
+    if (response) {
+      monitor.res = response
+      response.destroy()
+    }
+
+    return monitor
+  }
 }
 
 module.exports = fetch
