@@ -52,6 +52,10 @@ function fetch (opts = Object.create(null), cb) {
       bufs.length = 0
     })
 
+    req.once('cancel', function () {
+      bufs.length = 0
+    })
+
     req.once('response', function (res) {
       response = res
       res.on('data', function (buf) {
@@ -80,6 +84,7 @@ function fetch (opts = Object.create(null), cb) {
   return function abort (monitor = Object.create(null)) {
     if (req) {
       monitor.req = req
+      req.emit('cancel')
       req.abort()
     }
 
